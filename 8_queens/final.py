@@ -1,11 +1,13 @@
 # need to have a memory for the 92 solutions,
 #there are only 92 solutions, took chess masters 2 years ... the entire community
 #find 1 correct board configuration
-# #64 mapping structure above and beyond?!
+
 
 import numpy as np
 import random as rd
 from collections import Counter
+
+
 n_queens = 8
 
 
@@ -27,7 +29,7 @@ def row_check(z):
     return internal_count
 
 
-#make one return statement makes code better
+
 def create_population(size_of_population, is_permutation):
     if is_permutation == 1:
         #print(" Inputed 1 ")
@@ -53,58 +55,45 @@ def print_population(size_of_population, population):
               '{:>2}'.format(fitness(population[beta])))
 
 
-def cross_over(first_individual, second_individual):
-    cross_point = np.random.randint(1, n_queens - 1)
-    temp_first_individual = [0] * n_queens
-    temp_second_individual = [0] * n_queens
-    # Creates a temporary list of second individual in an accetable cross over way
-    for x in range(n_queens):
-        temp_first_individual[x] = second_individual[(x + 1) % n_queens]
-        temp_second_individual[x] = first_individual[(x + cross_point) % n_queens]
-    # remove all elements in temp that exist in individual pre crossover_pt
-    to_remove_list = []
-    print(cross_point)
-    print(first_individual, "first_individual")
-    print(temp_second_individual)
-    print(second_individual, "second_individual")
-    print(temp_first_individual)
-    print('h', to_remove_list, "h")
-    for x in range(n_queens):
-        if temp_second_individual[x] in first_individual[:cross_point]:
-            to_remove_list.append(x)
-    print('h', to_remove_list, "h")
-
-
 def one_pt_cross_over(first_individual, second_individual):
-    cross_point = 3#np.random.randint(1, n_queens - 1)
-    temp_first_individual = first_individual
-    temp_second_individual = second_individual
-    off_spring = [0] * n_queens
+    cross_point = np.random.randint(1, n_queens - 1)
+    first_temp = [55] * cross_point
+    second_temp = []
+    off_spring = [55] * n_queens
+    print(cross_point)
+    for x in range(n_queens):
+        if x < cross_point:
+            first_temp[x] = first_individual[x]
 
-    cross_point_check = [0] * cross_point
-    for y in range(cross_point):
-        cross_point_check[y] = temp_second_individual[y]
-    print(cross_point_check)
-
+    for x in range(n_queens):
+        count = 0
+        for y in range(cross_point):
+            if second_individual[(x+cross_point) % 8] == first_temp[y]:
+                count += 1
+            if count == 0 and y == cross_point-1:
+                second_temp.append(second_individual[(x+cross_point) % 8])
 
     for x in range(n_queens):
         if x < cross_point:
-            off_spring[x] = temp_first_individual[x]
-            print(x)
+            off_spring[x] = first_temp[x]
         if x >= cross_point:
-            off_spring[x] = temp_second_individual[x]
-    print('cross point:: ', cross_point)
-    print('first individual:: ', first_individual)
-    print('second individual:: ', second_individual)
-    print('offspring:: ', off_spring)
+            off_spring[x] = second_temp[x-cross_point]
+    return off_spring
 
 
+#create two point cross over
+#link files together in python _init_.py files
+#create selection from population
 def selection(): return 0
 
 
 population_size = 6
 population = create_population(population_size, 0)
-print(one_pt_cross_over(population[0], population[1]))
+print(population[0],population[1])
+#print(one_pt_cross_over(population[0], population[1]))
+
+
+
 #print(population[0], population[1])
 #cross_over(population[0], population[1])
 #print(population[0], population[1])

@@ -1,3 +1,4 @@
+#mutation done to use mutation.mutator(genomone) ... built exclusively for n-queens problem
 import numpy as np
 n_queens = 8
 

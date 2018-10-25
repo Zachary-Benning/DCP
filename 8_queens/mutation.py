@@ -139,7 +139,6 @@ def swap_multiple(genome):
         swap_function(genome, temp_swap_locations[0], temp_swap_locations[1])
 
 
-#Helper function to swap_multiple
 def swap_function(genome, location_a, location_b):
     swap_a = genome[location_a]
     swap_b = genome[location_b]
@@ -149,16 +148,12 @@ def swap_function(genome, location_a, location_b):
 
 def mutator(genome):
     pick = np.random.randint(0, 4)
-    print(' pick ',end='')
     if pick == 0:
-        print('reverse:: ', end='')
         reverse(genome)
     if pick == 1:
         weave(genome)
-        print('weave:: ', end='')
     if pick == 2:
-        print('section_move:: ', end='')
         section_move(genome)
     if pick == 3:
-        print('swap_multiple:: ', end='')
         swap_multiple(genome)
+

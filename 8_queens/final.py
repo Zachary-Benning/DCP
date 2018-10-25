@@ -7,7 +7,7 @@ import numpy as np
 import random as rd
 from collections import Counter
 n_queens = 8
-population_size = 100
+population_size = 5
 
 
 def diagonal_check(z):
@@ -302,16 +302,24 @@ def magic():
     population = create_population(population_size, 0)
     for x in range(10000):
         population = evolve(population)
-        if x % 1000 == 0:
+        if x == 0:
+            print("begin")
+        elif x % 1000 == 0:
             print(x)
             scory, one, two = selection(population_size, population)
             if scory[one] == 0:
-                print('perfect solution found @ ', x)
-                print(population[one])
+                #print('perfect solution found @ ', x)
+                #print(population[one])
+                return population[one]
                 break
 
+solutions = [0] * 10
 for x in range(10):
-    magic()
+    solutions[x] = magic()
+print(solutions)
+
+##########################TO DO##################################
+# Log it and compare it against checking every 10 or every single for 0 solution
 
 # scory, one, two = selection(population_size, population)
 # print(scory[one], population[one])

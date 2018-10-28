@@ -43,7 +43,8 @@ def fitness(individual): return row_check(individual) + diagonal_check(individua
 def find_second_value(input_value, input_location, score):
     input_scorez = input_value
     for y in range(0, 40):
-        for x in range(0, population_size):
+        for x in range(0, 4):
+            # end bound was population size ## 5 doesnt work not sure why ### addres this at a later time
             if score[x] == input_scorez and x != input_location:
                 return input_scorez
         input_scorez += 1
@@ -54,9 +55,7 @@ def pick_top_two(population, population_size):
     for x in range(0, population_size):
         score[x] = fitness(population[x])
     a = min(enumerate(score), key=(lambda x: x[1]))
-    best_value_location = a[0]
     number_one = a[0]
-    number_two = 0
     solution = find_second_value(a[1], a[0], score)
     zztop = np.where(score == solution)
     if len(zztop[0]) > 1:
@@ -68,28 +67,112 @@ def pick_top_two(population, population_size):
 
 def selection(population, population_size, tournament_type):
     if tournament_type == 0:
-        tournament_style_top_x(population, population_size, 5)
+        return tournament_style_top_x(population, population_size, 5)
 
 
 def tournament_style_top_x(population, population_size, x):
-    print("0")
     random_x = rd.sample(range(0, population_size), x)
-    print("1")
-    #print(random_x)
     top_x = [0] * x
     for x in range(x):
         top_x[x] = population[random_x[x]]
-    print("2")
-    #print(top_x)
     score, top_one, top_two = pick_top_two(top_x, x)
-    print('3')
-    print(top_one, top_two)
+    return top_x[top_one], top_x[top_two]
 
-current_population = create_population(population_size, representation_type)
-selection(current_population, population_size, representation_type)
-#it was working with just tournament style then when switched to selection function it broke
-# or at least it worked partially  ... it breaks due to a seg fault "index" issue.
+def swap_function(genome_to_swap, location_a, location_b):
+    swap_a = genome_to_swap[location_a]
+    swap_b = genome_to_swap[location_b]
+    genome_to_swap[location_a] = swap_b
+    genome_to_swap[location_b] = swap_a
+    return genome_to_swap
 
-#score, alpha, beta = pick_top_two(current_population, population_size)
-#print(current_population)
-#print(alpha, beta)
+
+def weave(genome_to_weave):
+    temp_genome = [0] * 8
+    even_genome = genome_to_weave[::2]
+    odd_genome = genome_to_weave[1::2]
+    odd_counter = 0
+    even_counter = 0
+    for x in range(len(genome_to_weave)):
+        if x % 2 == 1:
+            temp_genome[x] = even_genome[even_counter]
+            even_counter += 1
+        if x % 2 == 0:
+            temp_genome[x] = odd_genome[odd_counter]
+            odd_counter += 1
+    return temp_genome
+
+
+def mutator(genome_to_mutate):
+    extra_mutation_present = 1 if rd.uniform(0, 100) <= 12.5 else 0
+    two_random_locations = rd.sample(range(0, 7), 2)
+    if extra_mutation_present:
+        return weave(swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1]))
+    else:
+        return swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1])
+
+
+def cut_cross_fill(male, female):
+    cross_point = np.random.randint(1, n_queens - 1)
+    first_temp = [55] * cross_point
+    second_temp = []
+    off_spring = [55] * n_queens
+    for x in range(n_queens):
+        if x < cross_point:
+            first_temp[x] = male[x]
+    for x in range(n_queens):
+        count = 0
+        for y in range(cross_point):
+            if female[(x + cross_point) % 8] == first_temp[y]:
+                count += 1
+            if count == 0 and y == cross_point - 1:
+                second_temp.append(female[(x + cross_point) % 8])
+    for x in range(n_queens):
+        if x < cross_point:
+            off_spring[x] = first_temp[x]
+        if x >= cross_point:
+            off_spring[x] = second_temp[x - cross_point]
+
+    first_temp_two = [55] * cross_point
+    second_temp_two = []
+    off_spring_two = [55] * n_queens
+    for x in range(n_queens):
+        if x < cross_point:
+            first_temp_two[x] = female[x]
+    for x in range(n_queens):
+        count = 0
+        for y in range(cross_point):
+            if male[(x + cross_point) % 8] == first_temp_two[y]:
+                count += 1
+            if count == 0 and y == cross_point - 1:
+                second_temp_two.append(male[(x + cross_point) % 8])
+    for x in range(n_queens):
+        if x < cross_point:
+            off_spring_two[x] = first_temp_two[x]
+        if x >= cross_point:
+            off_spring_two[x] = second_temp_two[x - cross_point]
+    return off_spring, off_spring_two
+
+
+# ######################################################################################################################
+# ################################### TESTING ZONE ###### BEGIN ########################################################
+# ######################################################################################################################
+
+
+def two_point_crossover(male, female):
+    return male, female
+
+
+
+# ######################################################################################################################
+# ######################################################################################################################
+# ######################################################################################################################
+
+
+# current_population = create_population(population_size, representation_type)
+# individual_one, individual_two = selection(current_population, population_size, representation_type)
+# print(individual_one, individual_two)
+# print(cut_cross_fill(individual_one, individual_two))
+
+# ######################################################################################################################
+# ################################### TESTING ZONE ###### END ##########################################################
+# ######################################################################################################################

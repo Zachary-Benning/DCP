@@ -2,9 +2,10 @@ import numpy as np
 import random as rd
 from collections import Counter
 
+
 n_queens = 8
-population_size = 100
-generation_limit = 30
+population_size = 6
+#generation_limit = 30
 # representation 0 :: Simple Permutations
 # representation 1 :: Simple Combinations
 representation_type = 0
@@ -37,14 +38,13 @@ def row_check(z):
     return internal_count
 
 
-def fitness(individual): return row_check(individual) + diagonal_check(individual)
+def fitness(individual): return diagonal_check(individual) + row_check(individual)
 
 
 def find_second_value(input_value, input_location, score):
     input_scorez = input_value
     for y in range(0, 40):
         for x in range(0, 4):
-            # end bound was population size ## 5 doesnt work not sure why ### addres this at a later time
             if score[x] == input_scorez and x != input_location:
                 return input_scorez
         input_scorez += 1
@@ -77,6 +77,7 @@ def tournament_style_top_x(population, population_size, x):
         top_x[x] = population[random_x[x]]
     score, top_one, top_two = pick_top_two(top_x, x)
     return top_x[top_one], top_x[top_two]
+
 
 def swap_function(genome_to_swap, location_a, location_b):
     swap_a = genome_to_swap[location_a]
@@ -153,26 +154,94 @@ def cut_cross_fill(male, female):
     return off_spring, off_spring_two
 
 
+def two_point_crossover(parent_one, parent_two):
+    start, finish, length = create_two_point()
+    child_one = [0] * 8
+    child_two = [0] * 8
+    for x in range(0, 8):
+        if finish >= x >= start:
+            child_one[x] = parent_one[x]
+            child_two[x] = parent_two[x]
+        else:
+            child_one[x] = parent_two[x]
+            child_two[x] = parent_one[x]
+    for x in range(0, 8):
+        for y in range(0, 8):
+            if child_one[x] == child_one[y] and x != y:
+                child_one[y] = parent_two[x]
+            if child_two[x] == child_two[y] and x != y:
+                child_two[y] = parent_one[x]
+    return child_one, child_two
+
+
+def create_two_point():
+    end_point = rd.randint(1, 6)
+    start_point = rd.randint(0, end_point - 1)
+    length = end_point - start_point
+    return start_point, end_point, length
+
+
 # ######################################################################################################################
 # ################################### TESTING ZONE ###### BEGIN ########################################################
 # ######################################################################################################################
 
+## THINGS TO DO:: Fix bot two :: check top two works correctly something is suspect check pick second function
+## write documentation to pick two function
+# Then create function that deletes the bottom two
+# Then create a function that does it a 1000 times with 100 individuals
+# THen record best, worst, average of pop and write to graph
 
-def two_point_crossover(male, female):
-    return male, female
+def pick_bot_two(population, population_size):
+    score = np.zeros(population_size, int)
+    for x in range(0, population_size):
+        score[x] = fitness(population[x])
+    a = max(enumerate(score), key=(lambda x: x[1]))
+    number_one = a[0]
+    # solution = find_second_bot_value(a[1], a[0], score)
+    # zztop = np.where(score == solution)
+    # print(score, solution)
+    # print(len(zztop))
+    # if len(zztop[0]) > 1:
+    #     number_two = zztop[0][1]
+    # else:
+    #     number_two = zztop[0][0]
+    return score, number_one#, number_two
 
+
+def find_second_bot_value(input_value, input_location, score):
+    input_scorez = input_value
+    for y in range(0, 40):
+        for x in range(0, 4):
+            if score[x] == input_scorez and x != input_location:
+                return input_scorez
+        input_scorez += 1
 
 
 # ######################################################################################################################
 # ######################################################################################################################
 # ######################################################################################################################
 
+# gene =  [1, 7, 3, 4, 5, 6, 2, 0]
+# gene1 = [2, 4, 6, 0, 1, 3, 5, 7]
 
-# current_population = create_population(population_size, representation_type)
-# individual_one, individual_two = selection(current_population, population_size, representation_type)
-# print(individual_one, individual_two)
-# print(cut_cross_fill(individual_one, individual_two))
+current_population = create_population(population_size, representation_type)
+#print(current_population)
+individual_one, individual_two = selection(current_population, population_size, representation_type)
+#print('Parents:: ', individual_one, individual_two)
+baby_1, baby_2 = two_point_crossover(individual_one, individual_two)
+#print('Children pre muta:: ', baby_1, baby_2)
+mutator(baby_1)
+mutator(baby_2)
+#print('Mutated children:: ', baby_1, baby_2)
+current_population.append(baby_1)
+current_population.append(baby_2)
+print(current_population)
+
+
+score, bot_one = pick_bot_two(current_population, population_size)
+print(score, bot_one, 'the end')
 
 # ######################################################################################################################
 # ################################### TESTING ZONE ###### END ##########################################################
 # ######################################################################################################################
+

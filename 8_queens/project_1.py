@@ -4,7 +4,7 @@ from collections import Counter
 
 
 n_queens = 8
-population_size = 6
+population_size = 100
 #generation_limit = 30
 # representation 0 :: Simple Permutations
 # representation 1 :: Simple Combinations
@@ -197,8 +197,21 @@ def pick_bot_two(population, population_size):
         score[x] = fitness(population[x])
     a = max(enumerate(score), key=(lambda x: x[1]))
     number_one = a[0]
-    # solution = find_second_bot_value(a[1], a[0], score)
-    # zztop = np.where(score == solution)
+    print(a, a[0], a[1], score)
+    solution = find_second_bot_value(a[1], a[0], score)
+    ########################EXPERIMENT ZONE DANGER##############
+    print(score)
+    double = 0
+    for x in range(0, population_size):
+        if score[x] == a[1]:
+            print("got ya")
+            double += 1
+            if double <1:
+                print('found doubles')
+        print(score[x],end=' ')
+    print(score)
+    ############################################################
+    #zztop = np.where(score == solution)
     # print(score, solution)
     # print(len(zztop))
     # if len(zztop[0]) > 1:
@@ -235,11 +248,12 @@ mutator(baby_2)
 #print('Mutated children:: ', baby_1, baby_2)
 current_population.append(baby_1)
 current_population.append(baby_2)
-print(current_population)
+#print(current_population)
 
 
 score, bot_one = pick_bot_two(current_population, population_size)
-print(score, bot_one, 'the end')
+#print(score, bot_one, 'the end')
+
 
 # ######################################################################################################################
 # ################################### TESTING ZONE ###### END ##########################################################

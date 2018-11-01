@@ -1,11 +1,10 @@
 import numpy as np
 import random as rd
 from collections import Counter
-
+from scipy.stats import mode as md
 
 n_queens = 8
-population_size = 100
-#generation_limit = 30
+population_size = 1000
 # representation 0 :: Simple Permutations
 # representation 1 :: Simple Combinations
 representation_type = 0
@@ -132,7 +131,6 @@ def cut_cross_fill(male, female):
             off_spring[x] = first_temp[x]
         if x >= cross_point:
             off_spring[x] = second_temp[x - cross_point]
-
     first_temp_two = [55] * cross_point
     second_temp_two = []
     off_spring_two = [55] * n_queens
@@ -181,81 +179,72 @@ def create_two_point():
     return start_point, end_point, length
 
 
-# ######################################################################################################################
-# ################################### TESTING ZONE ###### BEGIN ########################################################
-# ######################################################################################################################
-
-## THINGS TO DO:: Fix bot two :: check top two works correctly something is suspect check pick second function
-## write documentation to pick two function
-# Then create function that deletes the bottom two
-# Then create a function that does it a 1000 times with 100 individuals
-# THen record best, worst, average of pop and write to graph
-
 def pick_bot_two(population, population_size):
     score = np.zeros(population_size, int)
     for x in range(0, population_size):
         score[x] = fitness(population[x])
     a = max(enumerate(score), key=(lambda x: x[1]))
     number_one = a[0]
-    print(a, a[0], a[1], score)
-    solution = find_second_bot_value(a[1], a[0], score)
-    ########################EXPERIMENT ZONE DANGER##############
-    print(score)
+    number_two = find_second_bot_value(a[1], a[0], score)
     double = 0
     for x in range(0, population_size):
         if score[x] == a[1]:
-            print("got ya")
             double += 1
-            if double <1:
+            if double < 1:
                 print('found doubles')
-        print(score[x],end=' ')
-    print(score)
-    ############################################################
-    #zztop = np.where(score == solution)
-    # print(score, solution)
-    # print(len(zztop))
-    # if len(zztop[0]) > 1:
-    #     number_two = zztop[0][1]
-    # else:
-    #     number_two = zztop[0][0]
-    return score, number_one#, number_two
+    return score, number_one, number_two
 
 
 def find_second_bot_value(input_value, input_location, score):
-    input_scorez = input_value
-    for y in range(0, 40):
-        for x in range(0, 4):
-            if score[x] == input_scorez and x != input_location:
-                return input_scorez
-        input_scorez += 1
+    count = 0
+    for x in range(0, input_value):
+        for y in range(0, population_size+2):
+            if input_value - x == score[y]:
+                count += 1
+            if count == 2:
+                return y
 
 
-# ######################################################################################################################
-# ######################################################################################################################
-# ######################################################################################################################
-
-# gene =  [1, 7, 3, 4, 5, 6, 2, 0]
-# gene1 = [2, 4, 6, 0, 1, 3, 5, 7]
-
-current_population = create_population(population_size, representation_type)
-#print(current_population)
-individual_one, individual_two = selection(current_population, population_size, representation_type)
-#print('Parents:: ', individual_one, individual_two)
-baby_1, baby_2 = two_point_crossover(individual_one, individual_two)
-#print('Children pre muta:: ', baby_1, baby_2)
-mutator(baby_1)
-mutator(baby_2)
-#print('Mutated children:: ', baby_1, baby_2)
-current_population.append(baby_1)
-current_population.append(baby_2)
-#print(current_population)
+def pick_worst(population, population_size):
+    score = np.zeros(population_size, int)
+    for x in range(0, population_size):
+        score[x] = fitness(population[x])
+    a = max(enumerate(score), key=(lambda x: x[1]))
+    return a[0]
 
 
-score, bot_one = pick_bot_two(current_population, population_size)
-#print(score, bot_one, 'the end')
+def run_experiment():
+    current_population = create_population(population_size, representation_type)
+    for generation_checker in range(1000):
+        if generation_checker % 100 == 0:
+            print(generation_checker)
+        individual_one, individual_two = selection(current_population, population_size, representation_type)
+        baby_1, baby_2 = two_point_crossover(individual_one, individual_two)
+
+        mutator(baby_1), mutator(baby_2)
+        current_population.append(baby_1), current_population.append(baby_2)
+
+        score, bot_one, bot_two = pick_bot_two(current_population, population_size+2)
+
+        new_population = []
+        for x in range(0, population_size+2):
+            if x != bot_one and x != bot_two:
+                new_population.append(current_population[x])
+
+        score, best, top_two = pick_top_two(new_population, population_size)
+        worst = pick_worst(new_population, population_size)
+        mean = np.mean(score)
+        median = np.median(score)
+        mode = md(score)
+        current_population = new_population
+    print('best ', score[best], ' mean ', mean, ' median ', median, ' mode', mode[0][0], ' worst ', score[worst])
+    count = 0
+    perfect_solutions = []
+    for xx in range(population_size):
+        if score[xx] == 0:
+            count += 1
+            perfect_solutions.append(current_population[xx])
+    print(count, " Perfect solutions")
 
 
-# ######################################################################################################################
-# ################################### TESTING ZONE ###### END ##########################################################
-# ######################################################################################################################
-
+run_experiment()

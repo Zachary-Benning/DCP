@@ -2,6 +2,8 @@ import numpy as np
 import random as rd
 from collections import Counter
 from scipy.stats import mode as md
+from multiprocessing import Process
+
 
 n_queens = 8
 population_size = 1000
@@ -213,7 +215,8 @@ def pick_worst(population, population_size):
     return a[0]
 
 
-def run_experiment():
+def run_experiment(crapycrap):
+    f = open("data_p1.txt", 'w+')
     current_population = create_population(population_size, representation_type)
     for generation_checker in range(1000):
         if generation_checker % 100 == 0:
@@ -237,14 +240,22 @@ def run_experiment():
         median = np.median(score)
         mode = md(score)
         current_population = new_population
-    print('best ', score[best], ' mean ', mean, ' median ', median, ' mode', mode[0][0], ' worst ', score[worst])
+        ##### 'best '  ############ ' mean ' ###### ' median ' ######## ' mode' ############ ' worst '
+        print(score[best], mean, median, mode[0][0], score[worst], file=f)
+        print(crapycrap)
     count = 0
     perfect_solutions = []
     for xx in range(population_size):
         if score[xx] == 0:
             count += 1
             perfect_solutions.append(current_population[xx])
-    print(count, " Perfect solutions")
+    print(' :: ', count, " Perfect solutions", file=f)
+    f.close()
 
 
-run_experiment()
+p = Process(target=run_experiment,args='1')
+q = Process(target=run_experiment,args='2')
+p.start()
+q.start()
+p.join()
+q.join()

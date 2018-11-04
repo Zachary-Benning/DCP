@@ -6,7 +6,7 @@ fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
 
 def animate(i):
-    pullData = open("/home/zac/Desktop/python_101/8_queens/sampleText.txt","r").read()
+    pullData = open("/home/zac/PycharmProjects/DCP/8_queens/data_p1.txt", "r").read()
     dataArray = pullData.split('\n')
     xar = []
     yar = []

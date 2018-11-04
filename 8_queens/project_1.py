@@ -2,6 +2,7 @@ import numpy as np
 import random as rd
 from collections import Counter
 from scipy.stats import mode as md
+import matplotlib.pyplot as plt
 from multiprocessing import Process
 
 
@@ -74,9 +75,9 @@ def selection(population, population_size, tournament_type):
 def tournament_style_top_x(population, population_size, x):
     random_x = rd.sample(range(0, population_size), x)
     top_x = [0] * x
-    for x in range(x):
-        top_x[x] = population[random_x[x]]
-    score, top_one, top_two = pick_top_two(top_x, x)
+    for z in range(x):
+        top_x[z] = population[random_x[z]]
+    score, top_one, top_two = pick_top_two(top_x, z)
     return top_x[top_one], top_x[top_two]
 
 
@@ -215,10 +216,17 @@ def pick_worst(population, population_size):
     return a[0]
 
 
-def run_experiment(crapycrap):
-    f = open("data_p1.txt", 'w+')
+def run_experiment():
+
+    output_score_best = []
+    output_mean = []
+    output_median = []
+    output_mode = []
+    output_score_worst = []
+
+    f = open("data_p0.csv", 'w+')
     current_population = create_population(population_size, representation_type)
-    for generation_checker in range(1000):
+    for generation_checker in range(1):
         if generation_checker % 100 == 0:
             print(generation_checker)
         individual_one, individual_two = selection(current_population, population_size, representation_type)
@@ -240,9 +248,14 @@ def run_experiment(crapycrap):
         median = np.median(score)
         mode = md(score)
         current_population = new_population
+
+        output_score_best.append(score[best])
+        output_mean.append(mean)
+        output_median.append(median)
+        output_mode.append(mode[0][0])
+        output_score_worst.append([worst])
         ##### 'best '  ############ ' mean ' ###### ' median ' ######## ' mode' ############ ' worst '
-        print(score[best], mean, median, mode[0][0], score[worst], file=f)
-        print(crapycrap)
+        print(score[best], ',', mean, ',', median, ',', mode[0][0], ',', score[worst], file=f)
     count = 0
     perfect_solutions = []
     for xx in range(population_size):
@@ -250,12 +263,15 @@ def run_experiment(crapycrap):
             count += 1
             perfect_solutions.append(current_population[xx])
     print(' :: ', count, " Perfect solutions", file=f)
-    f.close()
 
 
-p = Process(target=run_experiment,args='1')
-q = Process(target=run_experiment,args='2')
-p.start()
-q.start()
-p.join()
-q.join()
+run_experiment()
+
+# p = Process(target=run_experiment,args='1')
+# q = Process(target=run_experiment,args='2')
+# p.start()
+# q.start()
+# p.join()
+# q.join()
+
+

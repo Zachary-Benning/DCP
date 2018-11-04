@@ -277,30 +277,43 @@ def run_experiment(current_population, population_size, cross_type, representati
 # cross_type 0 :: single pt %%% cross_type 1 :: two point
 # representation 0 :: Simple Permutations %%% representation 1 :: Simple Combinations
 # mutation_type 0 :: mut00 = 1.0 mut01 = .125 %%% mutation_type 1 :: mut00 = .125 mut01
-population_size = 1000
+# run_experiment(current_population, population_size, cross_type, representation_type, mutation_type, fileName)
+
+population_size = 100
+# starting_population_pool = create_population(population_size, 0)
+# score = [1000] * 100
+# for xxx in range(0, 100):
+#     score[xxx] = fitness(starting_population_pool[xxx])
+#
+# print(score)
+# print(starting_population_pool)
+# print(starting_population_pool[0])
+#run_experiment(starting_population_pool, 100, 0, 1, 0, 'bob')
+
 for N in range(0, 30):
-    starting_population_pool = create_population(population_size, 0)
-    filefile000 = '000'
-    filefile100 = '100'
-    filefile001 = '001'
-    filefile101 = '101'
-    for x in range(0, 30):
-        newfilename000 = filefile000 + str(x + 1) + '.txt'
-        newfilename100 = filefile100 + str(x + 1) + '.txt'
-        newfilename001 = filefile001 + str(x + 1) + '.txt'
-        newfilename101 = filefile101 + str(x + 1) + '.txt'
+    starting_population_pool = create_population(population_size, 1)
+    print(starting_population_pool[0])
+    #filefile000 = '000'
+    #filefile100 = '100'
+    filefile010 = '010'
+    filefile110 = '110'
 
-        p = Process(target=run_experiment, args=(starting_population_pool, population_size, 0, 0, 0, newfilename000))
-        q = Process(target=run_experiment, args=(starting_population_pool, population_size, 1, 0, 0, newfilename100))
-        r = Process(target=run_experiment, args=(starting_population_pool, population_size, 0, 0, 1, newfilename001))
-        s = Process(target=run_experiment, args=(starting_population_pool, population_size, 1, 0, 1, newfilename101))
+    #newfilename000 = filefile000 + str(N + 1) + '.txt'
+    #newfilename100 = filefile100 + str(N + 1) + '.txt'
+    newfilename010 = filefile010 + str(N + 1) + '.txt'
+    newfilename110 = filefile110 + str(N + 1) + '.txt'
 
-        p.start()
-        q.start()
-        r.start()
-        s.start()
+    #p = Process(target=run_experiment, args=(starting_population_pool, population_size, 0, 0, 0, newfilename000))
+    #q = Process(target=run_experiment, args=(starting_population_pool, population_size, 1, 0, 0, newfilename100))
+    r = Process(target=run_experiment, args=(starting_population_pool, population_size, 0, 1, 0, newfilename010))
+    s = Process(target=run_experiment, args=(starting_population_pool, population_size, 1, 1, 0, newfilename110))
 
-        p.join()
-        q.join()
-        r.start()
-        s.join()
+    #p.start()
+    #q.start()
+    r.start()
+    s.start()
+
+    #p.join()
+    #q.join()
+    r.join()
+    s.join()

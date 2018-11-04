@@ -2,15 +2,8 @@ import numpy as np
 import random as rd
 from collections import Counter
 from scipy.stats import mode as md
-import matplotlib.pyplot as plt
 from multiprocessing import Process
-
-
 n_queens = 8
-population_size = 1000
-# representation 0 :: Simple Permutations
-# representation 1 :: Simple Combinations
-representation_type = 0
 
 
 def create_population(size_of_population, representation_type):
@@ -105,57 +98,78 @@ def weave(genome_to_weave):
     return temp_genome
 
 
-def mutator(genome_to_mutate):
-    extra_mutation_present = 1 if rd.uniform(0, 100) <= 12.5 else 0
-    two_random_locations = rd.sample(range(0, 7), 2)
-    if extra_mutation_present:
-        return weave(swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1]))
-    else:
-        return swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1])
+def mutator(genome_to_mutate, mutator_type):
+    if mutator_type == 0:
+        extra_mutation_present = 1 if rd.uniform(0, 100) <= 12.5 else 0
+        two_random_locations = rd.sample(range(0, 7), 2)
+        if extra_mutation_present:
+            return weave(swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1]))
+        else:
+            return swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1])
+
+    if mutator_type == 1:
+        extra_mutation_present = 1 if rd.uniform(0, 100) <= 12.5 else 0
+        two_random_locations = rd.sample(range(0, 7), 2)
+        if extra_mutation_present:
+            return swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1])
+        else:
+            return weave(swap_function(genome_to_mutate, two_random_locations[0], two_random_locations[1]))
 
 
-def cut_cross_fill(male, female):
+def cut_cross_fill(male, female, representation):
     cross_point = np.random.randint(1, n_queens - 1)
-    first_temp = [55] * cross_point
-    second_temp = []
-    off_spring = [55] * n_queens
-    for x in range(n_queens):
-        if x < cross_point:
-            first_temp[x] = male[x]
-    for x in range(n_queens):
-        count = 0
-        for y in range(cross_point):
-            if female[(x + cross_point) % 8] == first_temp[y]:
-                count += 1
-            if count == 0 and y == cross_point - 1:
-                second_temp.append(female[(x + cross_point) % 8])
-    for x in range(n_queens):
-        if x < cross_point:
-            off_spring[x] = first_temp[x]
-        if x >= cross_point:
-            off_spring[x] = second_temp[x - cross_point]
-    first_temp_two = [55] * cross_point
-    second_temp_two = []
-    off_spring_two = [55] * n_queens
-    for x in range(n_queens):
-        if x < cross_point:
-            first_temp_two[x] = female[x]
-    for x in range(n_queens):
-        count = 0
-        for y in range(cross_point):
-            if male[(x + cross_point) % 8] == first_temp_two[y]:
-                count += 1
-            if count == 0 and y == cross_point - 1:
-                second_temp_two.append(male[(x + cross_point) % 8])
-    for x in range(n_queens):
-        if x < cross_point:
-            off_spring_two[x] = first_temp_two[x]
-        if x >= cross_point:
-            off_spring_two[x] = second_temp_two[x - cross_point]
+
+    if representation == 0:
+        first_temp = [55] * cross_point
+        second_temp = []
+        off_spring = [55] * n_queens
+        for x in range(n_queens):
+            if x < cross_point:
+                first_temp[x] = male[x]
+        for x in range(n_queens):
+            count = 0
+            for y in range(cross_point):
+                if female[(x + cross_point) % 8] == first_temp[y]:
+                    count += 1
+                if count == 0 and y == cross_point - 1:
+                    second_temp.append(female[(x + cross_point) % 8])
+        for x in range(n_queens):
+            if x < cross_point:
+                off_spring[x] = first_temp[x]
+            if x >= cross_point:
+                off_spring[x] = second_temp[x - cross_point]
+        first_temp_two = [55] * cross_point
+        second_temp_two = []
+        off_spring_two = [55] * n_queens
+        for x in range(n_queens):
+            if x < cross_point:
+                first_temp_two[x] = female[x]
+        for x in range(n_queens):
+            count = 0
+            for y in range(cross_point):
+                if male[(x + cross_point) % 8] == first_temp_two[y]:
+                    count += 1
+                if count == 0 and y == cross_point - 1:
+                    second_temp_two.append(male[(x + cross_point) % 8])
+        for x in range(n_queens):
+            if x < cross_point:
+                off_spring_two[x] = first_temp_two[x]
+            if x >= cross_point:
+                off_spring_two[x] = second_temp_two[x - cross_point]
+    if representation == 1:
+        off_spring = [88] * 8
+        off_spring_two = [88] * 8
+        for x in range(0, 8):
+            if x < cross_point:
+                off_spring[x] = male[x]
+                off_spring_two[x] = female[x]
+            if x >= cross_point:
+                off_spring[x] = female[x]
+                off_spring_two[x] = male[x]
     return off_spring, off_spring_two
 
 
-def two_point_crossover(parent_one, parent_two):
+def two_point_crossover(parent_one, parent_two, representation):
     start, finish, length = create_two_point()
     child_one = [0] * 8
     child_two = [0] * 8
@@ -166,12 +180,13 @@ def two_point_crossover(parent_one, parent_two):
         else:
             child_one[x] = parent_two[x]
             child_two[x] = parent_one[x]
-    for x in range(0, 8):
-        for y in range(0, 8):
-            if child_one[x] == child_one[y] and x != y:
-                child_one[y] = parent_two[x]
-            if child_two[x] == child_two[y] and x != y:
-                child_two[y] = parent_one[x]
+    if representation == 0:
+        for x in range(0, 8):
+            for y in range(0, 8):
+                if child_one[x] == child_one[y] and x != y:
+                    child_one[y] = parent_two[x]
+                if child_two[x] == child_two[y] and x != y:
+                    child_two[y] = parent_one[x]
     return child_one, child_two
 
 
@@ -216,23 +231,21 @@ def pick_worst(population, population_size):
     return a[0]
 
 
-def run_experiment():
-
-    output_score_best = []
-    output_mean = []
-    output_median = []
-    output_mode = []
-    output_score_worst = []
-
-    f = open("data_p0.csv", 'w+')
-    current_population = create_population(population_size, representation_type)
-    for generation_checker in range(1):
+## INPUTS :: cross type 0,1 :: rep type 0,1 mutation type 0,1
+def run_experiment(current_population, population_size, cross_type, representation_type, mutation_type, fileName):
+    f = open(fileName, 'w+')
+    for generation_checker in range(1000):
+        ## Updater
         if generation_checker % 100 == 0:
-            print(generation_checker)
-        individual_one, individual_two = selection(current_population, population_size, representation_type)
-        baby_1, baby_2 = two_point_crossover(individual_one, individual_two)
+            print(fileName, generation_checker/10, '%')
+        individual_one, individual_two = selection(current_population, population_size, 0)
 
-        mutator(baby_1), mutator(baby_2)
+        if cross_type == 0:
+            baby_1, baby_2 = cut_cross_fill(individual_one, individual_two, representation_type)
+        if cross_type == 1:
+            baby_1, baby_2 = two_point_crossover(individual_one, individual_two, representation_type)
+
+        mutator(baby_1, mutation_type), mutator(baby_2, mutation_type)
         current_population.append(baby_1), current_population.append(baby_2)
 
         score, bot_one, bot_two = pick_bot_two(current_population, population_size+2)
@@ -249,11 +262,6 @@ def run_experiment():
         mode = md(score)
         current_population = new_population
 
-        output_score_best.append(score[best])
-        output_mean.append(mean)
-        output_median.append(median)
-        output_mode.append(mode[0][0])
-        output_score_worst.append([worst])
         ##### 'best '  ############ ' mean ' ###### ' median ' ######## ' mode' ############ ' worst '
         print(score[best], ',', mean, ',', median, ',', mode[0][0], ',', score[worst], file=f)
     count = 0
@@ -262,16 +270,37 @@ def run_experiment():
         if score[xx] == 0:
             count += 1
             perfect_solutions.append(current_population[xx])
-    print(' :: ', count, " Perfect solutions", file=f)
+    print(count, " Perfect solutions", file=f)
+    print('perfect solution individuals', perfect_solutions, file=f)
 
 
-run_experiment()
+# cross_type 0 :: single pt %%% cross_type 1 :: two point
+# representation 0 :: Simple Permutations %%% representation 1 :: Simple Combinations
+# mutation_type 0 :: mut00 = 1.0 mut01 = .125 %%% mutation_type 1 :: mut00 = .125 mut01
+population_size = 1000
+for N in range(0, 30):
+    starting_population_pool = create_population(population_size, 0)
+    filefile000 = '000'
+    filefile100 = '100'
+    filefile001 = '001'
+    filefile101 = '101'
+    for x in range(0, 30):
+        newfilename000 = filefile000 + str(x + 1) + '.txt'
+        newfilename100 = filefile100 + str(x + 1) + '.txt'
+        newfilename001 = filefile001 + str(x + 1) + '.txt'
+        newfilename101 = filefile101 + str(x + 1) + '.txt'
 
-# p = Process(target=run_experiment,args='1')
-# q = Process(target=run_experiment,args='2')
-# p.start()
-# q.start()
-# p.join()
-# q.join()
+        p = Process(target=run_experiment, args=(starting_population_pool, population_size, 0, 0, 0, newfilename000))
+        q = Process(target=run_experiment, args=(starting_population_pool, population_size, 1, 0, 0, newfilename100))
+        r = Process(target=run_experiment, args=(starting_population_pool, population_size, 0, 0, 1, newfilename001))
+        s = Process(target=run_experiment, args=(starting_population_pool, population_size, 1, 0, 1, newfilename101))
 
+        p.start()
+        q.start()
+        r.start()
+        s.start()
 
+        p.join()
+        q.join()
+        r.start()
+        s.join()

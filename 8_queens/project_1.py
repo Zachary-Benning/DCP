@@ -156,6 +156,7 @@ def cut_cross_fill(male, female, representation):
                 off_spring_two[x] = first_temp_two[x]
             if x >= cross_point:
                 off_spring_two[x] = second_temp_two[x - cross_point]
+
     if representation == 1:
         off_spring = [88] * 8
         off_spring_two = [88] * 8

@@ -78,6 +78,9 @@ current_population = create_population(population_size_declared, number_of_islan
 
 
 print(current_population)
+
+def dummy_func():
+    return 0
 #
 # pop_fitness = 0
 # for x in range(0, population_size_declared):

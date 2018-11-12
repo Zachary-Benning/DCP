@@ -114,7 +114,6 @@ def selection(individual_traits_in_island, number_local_pop_in_island, migrant_p
             z = np.random.randint(0, number_of_migrants)
             individuals_for_sex[x] = migrant_groupz[z]
         else:
-            print("pureblood")
             individuals_for_sex[x] = tournament_style(number_local_pop_in_island, individual_traits_in_island) #individual_traits_in_island[z]
     return individuals_for_sex
 
@@ -125,7 +124,7 @@ def tournament_style(number_in_local_population, population):
         y[x] = np.random.randint(0, number_in_local_population)
     current_pop_fitness = [99999] * 5
     for x in range(5):
-        current_pop_fitness[x] = sphere(gene_number_selection, population[x])## USING GLOBAL GENE NUMBER SELECTION
+        current_pop_fitness[x] = sphere(gene_number_selection, population[x]) - stats[2] ## USING GLOBAL GENE NUMBER SELECTION ## stats[2]
     b = list(enumerate(current_pop_fitness))
     c = sorted(b, key=lambda b: b[1])
     for x in range(5):
@@ -153,106 +152,69 @@ def create_migrant_group(island_pop, number_of_islands, migrant_pop_percentage, 
     return migrant_population, migrant_size
 
 
+def grow_population(population, number_of_islandz, islandz_population_size, percentage_migrant_population, migrantz_population, migrantz_size, gene_number_selection, stats):
+    for x in range(number_of_islandz):
+        for y in range(islandz_population_size // 2):
+            male, female = selection(islandz_population[x], islandz_population_size, percentage_migrant_population,
+                                     migrantz_population[(x+1) % number_of_islandz], migrantz_size)
+            c1, c2 = one_pt_cross_over(male, female, gene_number_selection) ###### GLOBAL VARIABLE USED GENE NUMBER SELECTION
+            mc1, mc2 = simple_mutator(c1, gene_number_selection, stats[1]), simple_mutator(c2, gene_number_selection, stats[1])
+            population[x].append(mc1)
+            population[x].append(mc2)
+    return population
 
+
+def kill(population, original_pop_size):
+    current_pop_fitness = [9999999] * len(population)
+    for x in range(len(population)):
+        current_pop_fitness[x] = sphere(gene_number_selection, population[x]) - stats[2] ## GLOBAL STATS GENENUMBER
+    b = list(enumerate(current_pop_fitness))
+    c = sorted(b, key=lambda b: b[1])
+    for y in range(original_pop_size):
+        c.pop()
+    final_population = []
+    print('best', c[0][1])
+    average = 0
+    for x in range(len(c)):
+        average += c[x][1]
+    print('average', round(average / len(c), 2))
+    for x in range(original_pop_size):
+        final_population.append(population[c[x][0]])
+    return final_population
 
 
 #####NOTE:########## Make sure island_number is a multiple of population size
 function_selection = 0
-gene_number_selection = 2
+gene_number_selection = 30
 number_of_islandz = 2
 number_of_total_population = 12
-percentage_migrant_population = .1
+percentage_migrant_population = .25
 islandz_population_size = number_of_total_population // number_of_islandz
+
+
 
 stats = get_stats(function_selection)
 general_population = create_population(number_of_total_population, stats, gene_number_selection)
 islandz_population = split_into_island_group(general_population, number_of_islandz, islandz_population_size)
 migrantz_population, migrantz_size = create_migrant_group(islandz_population, number_of_islandz,
                                                           percentage_migrant_population, islandz_population_size)
+populationsz = grow_population(islandz_population, number_of_islandz, islandz_population_size, percentage_migrant_population, migrantz_population, migrantz_size, gene_number_selection, stats)
 
-# print(islandz_population[0])
-# print(migrantz_population[0])
+for x in range(100):
+    for y in range(number_of_islandz):
+        if x % 30 == 0:
+            migrantz_population, migrantz_size = create_migrant_group(islandz_population, number_of_islandz,
+                                                                      percentage_migrant_population,
+                                                                      islandz_population_size)
+        if x > 0:
+            populationsz = grow_population(islandz_population, number_of_islandz, islandz_population_size,
+                                           percentage_migrant_population, migrantz_population, migrantz_size,
+                                           gene_number_selection, stats)
+        populationfinal = [0] * number_of_islandz
+        print(len(populationsz[y]))
+        populationfinal[y] = kill(populationsz[y], islandz_population_size)
+        populationsz = populationfinal
 
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-for x in range(1):
-    print('--->', islandz_population[0])
-    male, female = selection(islandz_population[0], islandz_population_size, percentage_migrant_population,
-                             migrantz_population[1], migrantz_size)
-    #note always pass through migrantz n + 1 mod island_number
-print('male/female', male, female)
-# print(islandz_population)
-# print(migrantz_population)
-
-#TODOOOOOO
-# onept-mutat plug in
-# append *** fitness **** pop
-# record best worst average
-# run for 30
-# create new migrant every 30
-
-
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-
-# #run_generation(bob, stats, migrant_group, migrant_population_size, number_of_islandz, island_counter, x)
-#
-# def run_generation(island, stats, migrant_group, migrant_population_size, number_of_islandz, island_count, trigger):#, better_island):
-#     best_island = [[[0] * gene_number_selection for x in range(island_count[y])] for y in range(number_of_islandz)]
-#     for island_number in range(number_of_islandz):
-#         better_island = []
-#         for x in range(0, number_of_total_population):
-#             if island[island_number][x] != 'N/A':
-#                 better_island.append(island[island_number][x][0])
-#         island_size_pre_birthing = len(better_island)
-#
-#         #############################################################################
-#         print('better island ', better_island)
-#         #############################################################################
-#
-#         for x in range(len(better_island)//2):
-#             parents = selection(better_island, len(better_island), percentage_migrant_population,
-#                                 migrant_group[island_number], migrant_population_size[island_number])
-#             child_uno, child_dos = one_pt_cross_over(parents[0], parents[1], gene_number_selection)
-#             simple_mutator(child_uno, gene_number_selection, stats[1])
-#             simple_mutator(child_dos, gene_number_selection, stats[1])
-#             better_island.append(child_uno)
-#             better_island.append(child_dos)
-#
-#         current_pop_fitness = [99999] * len(better_island)
-#         for x in range(len(better_island)):
-#             current_pop_fitness[x] = sphere(gene_number_selection, better_island[x])
-#         ###########################
-#         #if trigger == 299 or trigger == 0:
-#         average_is = 0
-#         for x in range(len(better_island)):
-#             average_is += current_pop_fitness[x]
-#         average_is /= len(better_island)
-#         print(round(average_is, 2))
-#         ###########################
-#         b = list(enumerate(current_pop_fitness))
-#         c = sorted(b, key=lambda b: b[1])
-#         better_island_second = [000000] * island_size_pre_birthing
-#         for x in range(island_size_pre_birthing):
-#             better_island_second[x] = better_island[c[x][0]]
-#         for y in range(0, island_count[island_number]):
-#             for z in range(0, gene_number_selection):
-#                 best_island[island_number][y][z] = better_island_second[y][z]
-#     return best_island
-
-# def run_for_a_while(islandz):
-#     for x in range(5):
-#         print(x)
-#         bob = run_generation(islandz, stats, migrant_group, migrant_population_size, number_of_islandz, island_counter, x)
-#         if x > 1:
-#             return run_generation(bob, stats, migrant_group, migrant_population_size, number_of_islandz, island_counter, x)
-#         else:
-#             return bob
-#
-# #############################
-# #######################
 # #######
 # # NEXT TO DO CLEAN ISLAND UP SO RECURSIVE WORKS
 # #############

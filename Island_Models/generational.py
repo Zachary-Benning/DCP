@@ -227,3 +227,4 @@ for x in range(3000):
 print(current_island_population[0])
 
 #### CHECK MIGRANTS CHANGING ALGORITHM
+

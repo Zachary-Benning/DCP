@@ -40,7 +40,7 @@ def fibonacci_the_long_way(numba):
     if numba == 2:
         value = 1
     elif numba > 2:
-        value = fibo(numba - 1) + fibo(numba - 2)
+        value = fibonacci_the_long_way(numba - 1) + fibonacci_the_long_way(numba - 2)
 
     fibonacci_cache[numba] = value
     return value

@@ -172,8 +172,8 @@ def generation(island_pop_count, number_of_islands, lb, ub):
     for y in range(number_of_islands):
         next_gen = [99999] * (island_pop_count // 2)
         for x in range(island_pop_count // 2): #add this with elitism((island_pop_count // 2) - 1):
-            next_gen[x] = (selection(current_island_population[y], island_capacity, migrant_percentage, current_migrant_population[y],
-                           migrant_population_size, target_value, number_of_traits, function_name, lb, ub))
+            next_gen[x] = selection(current_island_population[y], island_capacity, migrant_percentage, current_migrant_population[y],
+                                    migrant_population_size, target_value, number_of_traits, function_name, lb, ub)
         a = list(it.chain.from_iterable(next_gen))
         entire_pop_next_gen[y] = a
     return entire_pop_next_gen

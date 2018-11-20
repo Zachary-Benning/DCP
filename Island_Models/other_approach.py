@@ -30,26 +30,26 @@ class Individual:
 
 
 class Population:
-    def __init__(self, population_size, migrant_percentage, number_of_genes, stats):
-        self.population = [Individual(number_of_genes, stats).DNA for individuals in range(population_size)]
-
-
+    def __init__(self, population_size, number_of_genes, stats):
+        self.population = [Individual(number_of_genes, stats) for individuals in range(population_size)]
 
 
 stats = get_stats(0)
-print(stats)
+#print(stats)
 # individual1 = Individual(3, stats)
 # print(individual1.left_bound)
 # print(individual1.right_bound)
 # print(individual1.DNA)
 # print(individual1.fitness())
-pop1 = Population(2, .1, 3, stats)
+#pop1 = Population(2, .1, 3, stats)
 #print(pop1.population)
 number_of_islands = 3
-island_population = [Population(2, .1, 3, stats) for populations in range(number_of_islands)]
+island_population = [Population(2, 3, stats) for populations in range(number_of_islands)]
 
 for islands in range(number_of_islands):
-    print(island_population[islands].population)
+    print("new isle")
+    for individuals in range(2):
+        print(island_population[islands].population[individuals].fitness())
 # import datetime
 #
 #
